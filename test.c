@@ -6,13 +6,15 @@
 /*   By: bbeaurai <bbeaurai@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/14 11:41:43 by bbeaurai          #+#    #+#             */
-/*   Updated: 2026/05/20 10:49:21 by bbeaurai         ###   ########.fr       */
+/*   Updated: 2026/05/21 12:48:35 by bbeaurai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+
+#include <stdio.h>
 
 #define NC "\e[0m"
 #define YELLOW "\e[1;33m"
