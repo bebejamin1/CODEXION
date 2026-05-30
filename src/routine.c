@@ -14,7 +14,7 @@
 
 static void	start_compile(t_data *data, t_coder *coder)
 {
-	print_state(data, coder->id, "is compiling");
+	print_compile(data, coder->id);
 }
 
 static void	count_compile(t_data *data, t_coder *coder)

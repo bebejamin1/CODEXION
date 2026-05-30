@@ -6,7 +6,7 @@
 /*   By: bbeaurai <bbeaurai@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 16:01:56 by bbeaurai          #+#    #+#             */
-/*   Updated: 2026/05/30 11:25:50 by bbeaurai         ###   ########.fr       */
+/*   Updated: 2026/05/30 15:00:28 by bbeaurai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,11 @@ static int	check_burnout(t_data *data, t_coder *target)
 {
 	long long	now;
 
+	if (data->nb_compiles_req > 0
+		&& target->nb_compiles >= data->nb_compiles_req)
+		return (0);
 	now = current_time_ms();
-	if (now - target->last_compile_start >= data->time_to_burnout)
+	if (now - target->last_compile_start > data->time_to_burnout)
 	{
 		data->sim_running = 0;
 		pthread_cond_broadcast(&data->sched_cond);
@@ -66,7 +69,7 @@ static int	monitor_cycle(t_data *data)
 	}
 	if (all_done(data))
 	{
-		printf("\nAll coders have compiled\n");
+		printf("\n\033[0;32mAll coders have compiled.\033[0m\n");
 		data->sim_running = 0;
 	}
 	running = data->sim_running;
@@ -81,6 +84,6 @@ void	*monitor_thread(void *arg)
 
 	data = (t_data *)arg;
 	while (monitor_cycle(data))
-		usleep(1000);
+		usleep(100);
 	return (NULL);
 }

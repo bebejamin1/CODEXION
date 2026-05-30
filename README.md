@@ -68,27 +68,56 @@ interleave on the same line.
 
 ## Thread Synchronization Mechanisms
 
-Each coder is represented by a `pthread_t`. The monitor is also a separate
-thread.
+Each coder is represented by a `pthread_t`. The monitor runs in a dedicated
+`pthread_t` and polls every 100 µs to detect burnout within the required 10 ms
+window.
 
-`pthread_mutex_t` is used to protect shared simulation state, scheduler data,
-dongle state, and log output. This prevents race conditions when coders request
-or release dongles and when the monitor reads compile counters and deadlines.
+Two `pthread_mutex_t` protect shared state:
 
-`pthread_cond_t` is used to wake waiting coders when dongles are released, when a
-cooldown expires, or when the simulation stops.
+- `sched_lock` guards dongle availability (`is_used`, `available_at`), the
+  scheduler queue, compile counters, and the `sim_running` flag. Coders hold
+  this lock only while checking or updating shared state, never during
+  `sleep_ms` calls, preventing long blocking of other threads.
+- `print_lock` serializes all terminal output. It is always acquired before
+  `sched_lock` when both are needed, enforcing a consistent lock order and
+  preventing deadlock.
 
-The scheduler queue coordinates access to dongles. It ensures that two
-neighbouring coders cannot duplicate the same dongle and that a coder only logs
-`is compiling` after two `has taken a dongle` messages.
+One `pthread_cond_t` (`sched_cond`) is broadcast whenever dongle state changes
+(release, cooldown expiry, or simulation stop), waking all waiting coders so
+each can re-evaluate whether it can compile. `pthread_cond_timedwait` is used
+when a dongle cooldown is known in advance, avoiding busy-waiting.
+
+Race condition prevention example: the monitor reads `last_compile_start` and
+`nb_compiles` under `sched_lock`. Coders update these fields under the same
+lock before broadcasting on `sched_cond`. This guarantees the monitor never
+reads a partially updated deadline.
+
+Thread-safe communication between coders and the monitor: when the monitor
+detects burnout or all-done, it sets `sim_running = 0` under `sched_lock` and
+broadcasts on `sched_cond`. Waiting coders wake, observe `sim_running == 0`,
+and exit their loops cleanly without further lock contention.
 
 ## Resources
 
-- `pthread_create`, `pthread_join`, `pthread_mutex_*`, and `pthread_cond_*`
-  manual pages.
-- `gettimeofday(2)` manual page for millisecond timestamps.
+- `pthread_create(3)`, `pthread_join(3)`, `pthread_mutex_*(3)`, and
+  `pthread_cond_*(3)` manual pages — core threading primitives used throughout.
+- `gettimeofday(2)` manual page — millisecond timestamp implementation.
+- *The Little Book of Semaphores* by Allen B. Downey — dining philosophers
+  problem analysis and synchronization patterns.
+- *Operating Systems: Three Easy Pieces* (Arpaci-Dusseau) — chapters on
+  concurrency, locks, and condition variables.
 - 42 Norm documentation.
 - The Codexion subject and peer-evaluation scale.
-- AI was used as a review and debugging assistant to identify edge cases,
-  compare behavior with the subject, and improve tests and documentation. The
-  project logic and code remain reviewed and understood by the author.
+
+AI was used as a review and debugging assistant on the following parts:
+
+- Identifying the spurious burnout bug where a finished coder was incorrectly
+  flagged (off-by-one in the deadline check).
+- Reviewing lock ordering to confirm no deadlock between `print_lock` and
+  `sched_lock`.
+- Comparing output format against the subject example line by line.
+- Suggesting the `pthread_cond_timedwait` approach for cooldown wake-up to
+  avoid busy-waiting.
+
+All logic, architecture decisions, and code were written and understood by the
+author. AI output was always reviewed, tested, and validated before use.

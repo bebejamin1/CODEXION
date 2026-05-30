@@ -22,25 +22,17 @@ static int	try_acquire(t_data *data, t_coder *coder, int my_id)
 		sched_dequeue(data, my_id);
 		pthread_cond_broadcast(&data->sched_cond);
 		pthread_mutex_unlock(&data->sched_lock);
-		print_state(data, coder->id, "has taken a dongle");
-		print_state(data, coder->id, "has taken a dongle");
+		print_dongle_taken(data, coder->id);
+		print_dongle_taken(data, coder->id);
 		pthread_mutex_lock(&data->sched_lock);
 		return (1);
 	}
 	return (0);
 }
 
-static int	wait_one_coder(t_data *data, t_coder *coder, int my_id)
+static int	wait_one_coder(t_data *data, int my_id)
 {
-	if (data->wait_queue[0] == my_id && !coder->left_dongle->is_used
-		&& current_time_ms() >= coder->left_dongle->available_at)
-	{
-		coder->left_dongle->is_used = 1;
-		sched_dequeue(data, my_id);
-		pthread_mutex_unlock(&data->sched_lock);
-		print_state(data, coder->id, "has taken a dongle");
-		pthread_mutex_lock(&data->sched_lock);
-	}
+	sched_dequeue(data, my_id);
 	while (data->sim_running)
 		pthread_cond_wait(&data->sched_cond, &data->sched_lock);
 	pthread_mutex_unlock(&data->sched_lock);
@@ -71,7 +63,7 @@ int	scheduler_request(t_data *data, t_coder *coder)
 	pthread_mutex_lock(&data->sched_lock);
 	sched_enqueue(data, my_id);
 	if (data->nb_coders == 1)
-		return (wait_one_coder(data, coder, my_id));
+		return (wait_one_coder(data, my_id));
 	while (1)
 	{
 		if (!data->sim_running)

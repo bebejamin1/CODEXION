@@ -21,7 +21,38 @@ void	print_state(t_data *data, int id, const char *msg)
 	ts = current_time_ms() - data->start_time;
 	if (simulation_is_running(data) || msg[0] == 'b')
 	{
-		printf("[%lld] %d %s\n", ts, id, msg);
+		if (msg[0] == 'b')
+			printf("\033[0;31m%lld %d %s\033[0m\n", ts, id, msg);
+		else
+			printf("%lld %d %s\n", ts, id, msg);
+		fflush(stdout);
+	}
+	pthread_mutex_unlock(&data->print_lock);
+}
+
+void	print_dongle_taken(t_data *data, int id)
+{
+	long long	ts;
+
+	pthread_mutex_lock(&data->print_lock);
+	ts = current_time_ms() - data->start_time;
+	if (simulation_is_running(data))
+	{
+		printf("%lld %d has taken a dongle\n", ts, id);
+		fflush(stdout);
+	}
+	pthread_mutex_unlock(&data->print_lock);
+}
+
+void	print_compile(t_data *data, int id)
+{
+	long long	ts;
+
+	pthread_mutex_lock(&data->print_lock);
+	ts = current_time_ms() - data->start_time;
+	if (simulation_is_running(data))
+	{
+		printf("%lld %d is compiling\n", ts, id);
 		fflush(stdout);
 	}
 	pthread_mutex_unlock(&data->print_lock);

@@ -11,16 +11,11 @@
 /* ************************************************************************** */
 
 #include <stdlib.h>
-#include <stdio.h>
-#include <pthread.h>
+#include <string.h>
 #include "../inc/codexion.h"
 
 static int	init_dongle_and_coder(t_data *data, int i)
 {
-	if (pthread_mutex_init(&data->dongles[i].lock, NULL) != 0)
-		return (0);
-	if (pthread_cond_init(&data->dongles[i].cond, NULL) != 0)
-		return (0);
 	data->dongles[i].is_used = 0;
 	data->dongles[i].available_at = 0;
 	data->coders[i].id = i + 1;
@@ -44,14 +39,15 @@ static int	allocate_system(t_data *data)
 		free(data->dongles);
 		return (0);
 	}
-	data->wait_queue = calloc(data->nb_coders, sizeof(int));
+	data->wait_queue = malloc(sizeof(int) * data->nb_coders);
 	if (!data->wait_queue)
 	{
 		free(data->coders);
 		free(data->dongles);
 		return (0);
 	}
-	data->wait_order = calloc(data->nb_coders, sizeof(int));
+	memset(data->wait_queue, 0, sizeof(int) * data->nb_coders);
+	data->wait_order = malloc(sizeof(int) * data->nb_coders);
 	if (!data->wait_order)
 	{
 		free(data->wait_queue);
@@ -59,14 +55,13 @@ static int	allocate_system(t_data *data)
 		free(data->dongles);
 		return (0);
 	}
+	memset(data->wait_order, 0, sizeof(int) * data->nb_coders);
 	return (1);
 }
 
 static int	init_sync_objects(t_data *data)
 {
 	if (pthread_mutex_init(&data->print_lock, NULL) != 0)
-		return (0);
-	if (pthread_mutex_init(&data->state_lock, NULL) != 0)
 		return (0);
 	if (pthread_mutex_init(&data->sched_lock, NULL) != 0)
 		return (0);

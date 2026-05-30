@@ -59,7 +59,7 @@ int	main(int argc, char **argv)
 	data = malloc(sizeof(t_data));
 	if (!data)
 	{
-		perror("malloc");
+		fprintf(stderr, "malloc failed\n");
 		return (EXIT_FAILURE);
 	}
 	set_data_from_args(data, argv);

@@ -1,7 +1,19 @@
 NAME = codexion
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -pthread -I inc
-SRCS = main.c $(wildcard src/*.c)
+SRCS = main.c \
+	src/actions.c \
+	src/cleanup.c \
+	src/init.c \
+	src/monitor.c \
+	src/routine.c \
+	src/scheduler.c \
+	src/scheduler_checks.c \
+	src/scheduler_queue.c \
+	src/scheduler_time.c \
+	src/threads.c \
+	src/utils.c \
+	src/validate.c
 OBJDIR = obj
 OBJS = $(SRCS:%.c=$(OBJDIR)/%.o)
 
@@ -13,35 +25,30 @@ all: $(NAME)
 
 $(NAME): $(OBJS)
 	@echo " "
-	@echo "$(GREEN)🚧 Compilation of $(NAME)...$(RESET)"
+	@echo "$(GREEN)Compilation of $(NAME)...$(RESET)"
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 	@echo " "
-	@echo "$(GREEN)👌 $(NAME) Successfully created!$(RESET)"
+	@echo "$(GREEN)$(NAME) Successfully created!$(RESET)"
 	@echo " "
 
 $(OBJDIR)/%.o: %.c
 	@echo " "
-	@echo "$(GREEN)⏳ Compilation of $<...$(RESET)"
+	@echo "$(GREEN)Compiling $<...$(RESET)"
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	clear
 	@echo " "
-	@echo "$(RED)🧹 Cleaning up object files...$(RESET)"
-	rm -rf $(OBJDIR)
-	rm -rf $(NAME)
-
+	@echo "$(RED)Cleaning up object files...$(RESET)"
+	@rm -rf $(OBJDIR)
+	@echo " "
 
 fclean: clean
-	clear
 	@echo " "
-	@echo "$(RED)🗑️  Removal of $(NAME)$(RESET)"
-	rm -f $(NAME)
+	@echo "$(RED)Removal of $(NAME)$(RESET)"
+	@rm -f $(NAME)
+	@echo " "
 
 re: fclean all
 
-.PHONY: all clean fclean re test
-
-test: all
-	./tests/run_tests.sh
+.PHONY: all clean fclean re

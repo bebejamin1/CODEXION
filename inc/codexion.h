@@ -17,8 +17,6 @@
 
 typedef struct s_dongle
 {
-	pthread_mutex_t	lock;
-	pthread_cond_t	cond;
 	int				is_used;
 	long long		available_at;
 }					t_dongle;
@@ -47,7 +45,6 @@ typedef struct s_data
 	long long		start_time;
 	int				sim_running;
 	pthread_mutex_t	print_lock;
-	pthread_mutex_t	state_lock;
 	pthread_mutex_t	sched_lock;
 	pthread_cond_t	sched_cond;
 	int				*wait_queue;
@@ -80,6 +77,8 @@ void		*coder_routine(void *arg);
 void		*monitor_thread(void *arg);
 
 void		print_state(t_data *data, int id, const char *msg);
+void		print_dongle_taken(t_data *data, int id);
+void		print_compile(t_data *data, int id);
 void		stop_simulation(t_data *data);
 int			simulation_is_running(t_data *data);
 

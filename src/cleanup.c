@@ -15,19 +15,9 @@
 
 void	cleanup_system(t_data *data)
 {
-	int	i;
-
 	if (!data)
 		return ;
-	i = 0;
-	while (i < data->nb_coders)
-	{
-		pthread_mutex_destroy(&data->dongles[i].lock);
-		pthread_cond_destroy(&data->dongles[i].cond);
-		i++;
-	}
 	pthread_mutex_destroy(&data->print_lock);
-	pthread_mutex_destroy(&data->state_lock);
 	pthread_mutex_destroy(&data->sched_lock);
 	pthread_cond_destroy(&data->sched_cond);
 	free(data->dongles);

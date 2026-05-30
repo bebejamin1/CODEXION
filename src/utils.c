@@ -11,8 +11,6 @@
 /* ************************************************************************** */
 
 #include <sys/time.h>
-#include <stdlib.h>
-#include <ctype.h>
 #include <unistd.h>
 #include "../inc/codexion.h"
 
@@ -33,7 +31,7 @@ int	ft_atoi(const char *s)
 			sign = -1;
 		s++;
 	}
-	while (*s && isdigit((unsigned char)*s))
+	while (*s && (*s >= '0' && *s <= '9'))
 	{
 		result = result * 10 + (*s - '0');
 		s++;
@@ -51,7 +49,7 @@ int	is_number(const char *s)
 		return (0);
 	while (*s)
 	{
-		if (!isdigit((unsigned char)*s))
+		if (!(*s >= '0' && *s <= '9'))
 			return (0);
 		s++;
 	}
