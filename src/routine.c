@@ -10,9 +10,19 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <stdio.h>
 #include "../inc/codexion.h"
+
+static void	start_compile(t_data *data, t_coder *coder)
+{
+	print_state(data, coder->id, "is compiling");
+}
+
+static void	count_compile(t_data *data, t_coder *coder)
+{
+	pthread_mutex_lock(&data->sched_lock);
+	coder->nb_compiles++;
+	pthread_mutex_unlock(&data->sched_lock);
+}
 
 void	*coder_routine(void *arg)
 {
@@ -21,21 +31,18 @@ void	*coder_routine(void *arg)
 
 	coder = (t_coder *)arg;
 	data = coder->data;
-	while (data->sim_running)
+	while (simulation_is_running(data))
 	{
-		scheduler_request(data, coder);
-		coder->last_compile_start = current_time_ms();
-		print_state(data, coder->id, "is compiling");
-		usleep(data->time_to_compile * 1000);
-		coder->nb_compiles++;
+		if (!scheduler_request(data, coder))
+			break ;
+		start_compile(data, coder);
+		sleep_ms(data->time_to_compile);
+		count_compile(data, coder);
 		scheduler_release(data, coder);
 		print_state(data, coder->id, "is debugging");
-		usleep(data->time_to_debug * 1000);
+		sleep_ms(data->time_to_debug);
 		print_state(data, coder->id, "is refactoring");
-		usleep(data->time_to_refactor * 1000);
-		if (data->nb_compiles_req > 0
-			&& coder->nb_compiles >= data->nb_compiles_req)
-			break ;
+		sleep_ms(data->time_to_refactor);
 	}
 	return (NULL);
 }

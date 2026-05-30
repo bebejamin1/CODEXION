@@ -13,6 +13,7 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <unistd.h>
 #include "../inc/codexion.h"
 
 int	ft_atoi(const char *s)
@@ -64,4 +65,13 @@ long long	current_time_ms(void)
 	if (gettimeofday(&tv, NULL) != 0)
 		return (0);
 	return ((long long)tv.tv_sec * 1000LL + tv.tv_usec / 1000LL);
+}
+
+void	sleep_ms(int ms)
+{
+	long long	end;
+
+	end = current_time_ms() + ms;
+	while (current_time_ms() < end)
+		usleep(500);
 }

@@ -10,7 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,11 +65,6 @@ int	main(int argc, char **argv)
 	set_data_from_args(data, argv);
 	if (!start_simulation(data, &monitor))
 		return (EXIT_FAILURE);
-	printf("Parsed: coders=%d burnout=%d compile=%d debug=%d refactor=%d\n",
-		data->nb_coders, data->time_to_burnout, data->time_to_compile,
-		data->time_to_debug, data->time_to_refactor);
-	printf("req=%d cooldown=%d scheduler=%s\n",
-		data->nb_compiles_req, data->dongle_cooldown, argv[8]);
 	wait_threads(data, monitor);
 	cleanup_system(data);
 	free(data);

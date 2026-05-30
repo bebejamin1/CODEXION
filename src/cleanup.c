@@ -33,4 +33,5 @@ void	cleanup_system(t_data *data)
 	free(data->dongles);
 	free(data->coders);
 	free(data->wait_queue);
+	free(data->wait_order);
 }

@@ -6,69 +6,81 @@
 /*   By: bbeaurai <bbeaurai@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 10:25:00 by bbeaurai          #+#    #+#             */
-/*   Updated: 2026/05/24 10:25:04 by bbeaurai         ###   ########.fr       */
+/*   Updated: 2026/05/30 00:00:00 by bbeaurai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/codexion.h"
 
-static void	enqueue_edf(t_data *data, int coder_id, int *i_ptr)
+int	priority_before(t_data *data, int first_id, int second_id)
 {
-	long long	now;
-	long long	rem_new;
-	long long	rem;
-	int			i;
+	long long	first_deadline;
+	long long	second_deadline;
 
-	now = current_time_ms();
-	rem_new = data->coders[coder_id - 1].last_compile_start
-		+ data->time_to_burnout - now;
-	i = 0;
-	while (i < data->wait_count)
+	if (data->scheduler_type == 0)
+		return (data->wait_order[first_id - 1]
+			< data->wait_order[second_id - 1]);
+	first_deadline = data->coders[first_id - 1].last_compile_start
+		+ data->time_to_burnout;
+	second_deadline = data->coders[second_id - 1].last_compile_start
+		+ data->time_to_burnout;
+	if (first_deadline == second_deadline)
+		return (first_id < second_id);
+	return (first_deadline < second_deadline);
+}
+
+static void	swap_waiters(t_data *data, int first, int second)
+{
+	int	tmp;
+
+	tmp = data->wait_queue[first];
+	data->wait_queue[first] = data->wait_queue[second];
+	data->wait_queue[second] = tmp;
+}
+
+static void	heap_up(t_data *data, int index)
+{
+	int	parent;
+
+	while (index > 0)
 	{
-		rem = data->coders[data->wait_queue[i] - 1].last_compile_start
-			+ data->time_to_burnout - now;
-		if (rem > rem_new)
-			break ;
-		if (rem == rem_new && coder_id < data->wait_queue[i])
-			break ;
-		i++;
+		parent = (index - 1) / 2;
+		if (!priority_before(data, data->wait_queue[index],
+				data->wait_queue[parent]))
+			return ;
+		swap_waiters(data, index, parent);
+		index = parent;
 	}
-	*i_ptr = i;
 }
 
 void	sched_enqueue(t_data *data, int coder_id)
 {
-	int	i;
-	int	j;
-
-	if (data->wait_count >= data->nb_coders)
+	if (data->wait_order[coder_id - 1] != 0
+		|| data->wait_count >= data->nb_coders)
 		return ;
-	if (data->scheduler_type == 1)
-		enqueue_edf(data, coder_id, &i);
-	else
-		i = data->wait_count;
-	j = data->wait_count;
-	while (j > i)
-	{
-		data->wait_queue[j] = data->wait_queue[j - 1];
-		j--;
-	}
-	data->wait_queue[i] = coder_id;
+	data->wait_order[coder_id - 1] = data->next_order;
+	data->next_order++;
+	data->wait_queue[data->wait_count] = coder_id;
+	heap_up(data, data->wait_count);
 	data->wait_count++;
 }
 
 void	sched_dequeue(t_data *data, int coder_id)
 {
 	int	i;
-	int	j;
 
 	i = 0;
-	j = 0;
+	while (i < data->wait_count && data->wait_queue[i] != coder_id)
+		i++;
+	if (i == data->wait_count)
+		return ;
+	data->wait_order[coder_id - 1] = 0;
+	data->wait_count--;
+	data->wait_queue[i] = data->wait_queue[data->wait_count];
+	i = 1;
 	while (i < data->wait_count)
 	{
-		if (data->wait_queue[i] != coder_id)
-			data->wait_queue[j++] = data->wait_queue[i];
+		heap_up(data, i);
 		i++;
 	}
-	data->wait_count = j;
 }

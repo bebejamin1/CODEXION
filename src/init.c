@@ -51,6 +51,14 @@ static int	allocate_system(t_data *data)
 		free(data->dongles);
 		return (0);
 	}
+	data->wait_order = calloc(data->nb_coders, sizeof(int));
+	if (!data->wait_order)
+	{
+		free(data->wait_queue);
+		free(data->coders);
+		free(data->dongles);
+		return (0);
+	}
 	return (1);
 }
 
@@ -88,6 +96,7 @@ int	init_system(t_data *data)
 	if (!init_sync_objects(data))
 	{
 		free(data->wait_queue);
+		free(data->wait_order);
 		free(data->coders);
 		free(data->dongles);
 		return (0);
@@ -95,11 +104,13 @@ int	init_system(t_data *data)
 	if (!init_coders(data))
 	{
 		free(data->wait_queue);
+		free(data->wait_order);
 		free(data->coders);
 		free(data->dongles);
 		return (0);
 	}
 	data->wait_count = 0;
+	data->next_order = 1;
 	data->sim_running = 1;
 	return (1);
 }

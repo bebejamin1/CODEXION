@@ -51,7 +51,9 @@ typedef struct s_data
 	pthread_mutex_t	sched_lock;
 	pthread_cond_t	sched_cond;
 	int				*wait_queue;
+	int				*wait_order;
 	int				wait_count;
+	int				next_order;
 	t_dongle		*dongles;
 	t_coder			*coders;
 }					t_data;
@@ -65,17 +67,25 @@ void		wait_threads(t_data *data, pthread_t monitor);
 
 void		sched_enqueue(t_data *data, int coder_id);
 void		sched_dequeue(t_data *data, int coder_id);
+int			priority_before(t_data *data, int first_id, int second_id);
 
-void		scheduler_request(t_data *data, t_coder *coder);
+int			scheduler_request(t_data *data, t_coder *coder);
 void		scheduler_release(t_data *data, t_coder *coder);
+int			coder_can_compile(t_coder *coder);
+int			priority_is_clear(t_data *data, int my_id);
+void		get_timeout(struct timespec *timeout, long long wake_time);
+long long	next_wake_time(t_coder *coder);
 
 void		*coder_routine(void *arg);
 void		*monitor_thread(void *arg);
 
 void		print_state(t_data *data, int id, const char *msg);
+void		stop_simulation(t_data *data);
+int			simulation_is_running(t_data *data);
 
 int			ft_atoi(const char *s);
 int			is_number(const char *s);
 long long	current_time_ms(void);
+void		sleep_ms(int ms);
 
 #endif
