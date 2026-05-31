@@ -85,6 +85,6 @@ int			simulation_is_running(t_data *data);
 int			ft_atoi(const char *s);
 int			is_number(const char *s);
 long long	current_time_ms(void);
-void		sleep_ms(int ms);
+void		sleep_ms(t_data *data, int ms);
 
 #endif

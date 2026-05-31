@@ -65,11 +65,11 @@ long long	current_time_ms(void)
 	return ((long long)tv.tv_sec * 1000LL + tv.tv_usec / 1000LL);
 }
 
-void	sleep_ms(int ms)
+void	sleep_ms(t_data *data, int ms)
 {
 	long long	end;
 
 	end = current_time_ms() + ms;
-	while (current_time_ms() < end)
+	while (current_time_ms() < end && simulation_is_running(data))
 		usleep(500);
 }

@@ -1,3 +1,6 @@
+readme ressource / unage
+
+
 ╔══════════════════════════════════════════════════════════════════════════════════╗
 ║                         CODEXION — EXPLICATION COMPLÈTE                        ║
 ║                     Projet 42 — Problème des philosophes (variante)            ║

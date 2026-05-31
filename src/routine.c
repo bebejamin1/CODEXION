@@ -36,13 +36,13 @@ void	*coder_routine(void *arg)
 		if (!scheduler_request(data, coder))
 			break ;
 		start_compile(data, coder);
-		sleep_ms(data->time_to_compile);
+		sleep_ms(data, data->time_to_compile);
 		count_compile(data, coder);
 		scheduler_release(data, coder);
 		print_state(data, coder->id, "is debugging");
-		sleep_ms(data->time_to_debug);
+		sleep_ms(data, data->time_to_debug);
 		print_state(data, coder->id, "is refactoring");
-		sleep_ms(data->time_to_refactor);
+		sleep_ms(data, data->time_to_refactor);
 	}
 	return (NULL);
 }
