@@ -319,11 +319,11 @@ All logic, architecture decisions, and code were written and understood by the a
 
 ---
 
-# Explication complète du code — ligne par ligne
+# Complete Code Walkthrough — Line by Line
 
-## Concept général
+## General Concept
 
-Des **coders** sont assis en cercle autour d'une table. Entre chaque paire de voisins se trouve une **clé USB (dongle)**. Pour compiler, un coder a besoin de ses **2 dongles voisins EN MÊME TEMPS**. Après compilation, il débogue, refactorise, puis recommence. S'il n'arrive pas à compiler avant le délai (`time_to_burnout`), il **brûle** et la simulation s'arrête.
+**Coders** sit in a circle around a table. Between each pair of neighbours there is a **USB dongle**. To compile, a coder needs its **2 neighbouring dongles AT THE SAME TIME**. After compiling, it debugs, refactors, then starts over. If it fails to compile before the deadline (`time_to_burnout`), it **burns out** and the simulation stops.
 
 ```
       Coder 1
@@ -337,81 +337,81 @@ Coder 5       Coder 2
       Coder 4 — dongle3 — Coder 3
 ```
 
-> Coder 1 a besoin de `dongle5` **ET** `dongle1` simultanément.
-> Coder 1 et Coder 3 peuvent compiler **EN MÊME TEMPS** (aucun dongle partagé).
+> Coder 1 needs `dongle5` **AND** `dongle1` simultaneously.
+> Coder 1 and Coder 3 can compile **AT THE SAME TIME** (no shared dongle).
 
 ---
 
-## Architecture des fichiers
+## File Architecture
 
 ```
 codexion/
-├── main.c                ← Point d'entrée
-├── inc/codexion.h        ← Toutes les structures et prototypes
+├── main.c                ← Entry point
+├── inc/codexion.h        ← All structures and prototypes
 ├── Makefile
 └── src/
-    ├── validate.c        ← Vérifie les arguments
-    ├── init.c            ← Alloue mémoire, initialise mutexes/coders/dongles
-    ├── threads.c         ← Crée les threads, pré-enregistre la queue
-    ├── routine.c         ← Boucle principale d'un coder
-    ├── scheduler.c       ← Demande/libère les dongles, gère l'attente
-    ├── scheduler_queue.c ← File de priorité (min-heap) + FIFO/EDF
-    ├── scheduler_checks.c← Vérifie si un coder peut compiler
-    ├── scheduler_time.c  ← Calcul des timeouts de cooldown
-    ├── monitor.c         ← Thread surveillant burnout et fin de simulation
-    ├── actions.c         ← Toutes les fonctions d'affichage
-    ├── cleanup.c         ← Libère la mémoire et détruit les mutexes
+    ├── validate.c        ← Validates arguments
+    ├── init.c            ← Allocates memory, initialises mutexes/coders/dongles
+    ├── threads.c         ← Creates threads, pre-registers the queue
+    ├── routine.c         ← Main loop of a coder
+    ├── scheduler.c       ← Requests/releases dongles, handles waiting
+    ├── scheduler_queue.c ← Priority queue (min-heap) + FIFO/EDF
+    ├── scheduler_checks.c← Checks whether a coder can compile
+    ├── scheduler_time.c  ← Computes cooldown timeouts
+    ├── monitor.c         ← Thread watching for burnout and simulation end
+    ├── actions.c         ← All display functions
+    ├── cleanup.c         ← Frees memory and destroys mutexes
     └── utils.c           ← ft_atoi, is_number, current_time_ms, sleep_ms
 ```
 
 ---
 
-## Structures de données — `inc/codexion.h`
+## Data Structures — `inc/codexion.h`
 
 ### `t_dongle`
-| Champ | Type | Rôle |
+| Field | Type | Role |
 |---|---|---|
-| `is_used` | int | 1 si un coder l'utilise en ce moment |
-| `available_at` | long long | Timestamp (ms) de disponibilité après cooldown |
+| `is_used` | int | 1 if a coder is currently using it |
+| `available_at` | long long | Timestamp (ms) of availability after cooldown |
 
 ### `t_coder`
-| Champ | Type | Rôle |
+| Field | Type | Role |
 |---|---|---|
-| `id` | int | Numéro du coder (1..N) |
-| `thread_id` | pthread_t | Son thread POSIX |
-| `nb_compiles` | int | Nombre de compilations effectuées |
-| `last_compile_start` | long long | Timestamp du dernier début de compile |
-| `left_dongle` | t_dongle* | Pointeur vers le dongle gauche |
-| `right_dongle` | t_dongle* | Pointeur vers le dongle droit |
-| `data` | t_data* | Pointeur vers l'état global |
+| `id` | int | Coder number (1..N) |
+| `thread_id` | pthread_t | Its POSIX thread |
+| `nb_compiles` | int | Number of compilations completed |
+| `last_compile_start` | long long | Timestamp of the last compile start |
+| `left_dongle` | t_dongle* | Pointer to the left dongle |
+| `right_dongle` | t_dongle* | Pointer to the right dongle |
+| `data` | t_data* | Pointer to global state |
 
-### `t_data` — état global de toute la simulation
+### `t_data` — global simulation state
 
 ```
-PARAMÈTRES (argv) :
+PARAMETERS (argv):
   nb_coders, time_to_burnout, time_to_compile, time_to_debug,
   time_to_refactor, nb_compiles_req, dongle_cooldown,
   scheduler_type (0=FIFO, 1=EDF), start_time
 
-SYNCHRONISATION :
-  pthread_mutex_t print_lock  → protège tout affichage stdout
-  pthread_mutex_t sched_lock  → protège la queue, les dongles, sim_running
-  pthread_cond_t  sched_cond  → réveille les coders en attente
+SYNCHRONISATION:
+  pthread_mutex_t print_lock  → protects all stdout output
+  pthread_mutex_t sched_lock  → protects the queue, dongles, sim_running
+  pthread_cond_t  sched_cond  → wakes up waiting coders
 
-FILE DE PRIORITÉ (min-heap) :
-  int *wait_queue   → IDs des coders dans la heap
-  int *wait_order   → wait_order[i] = ordre FIFO du coder i+1
-  int  wait_count   → nombre de coders dans la queue
-  int  next_order   → prochain numéro d'ordre FIFO
+PRIORITY QUEUE (min-heap):
+  int *wait_queue   → coder IDs in the heap
+  int *wait_order   → wait_order[i] = FIFO order of coder i+1
+  int  wait_count   → number of coders in the queue
+  int  next_order   → next FIFO order number
 
   t_dongle *dongles, t_coder *coders, int sim_running
 ```
 
-**Ordre des verrous — toujours respecté :**
+**Lock order — always respected:**
 ```
 print_lock  ──────►  sched_lock
 ```
-On prend toujours `print_lock` **avant** `sched_lock`. Jamais l'inverse.
+`print_lock` is always acquired **before** `sched_lock`. Never the other way around.
 
 ---
 
@@ -421,11 +421,11 @@ On prend toujours `print_lock` **avant** `sched_lock`. Jamais l'inverse.
 main()
 ├── validate_args(argc, argv)
 ├── malloc(sizeof(t_data))
-├── set_data_from_args()      ← copie argv dans data
+├── set_data_from_args()      ← copies argv into data
 ├── start_simulation()
-│     ├── init_system(data)   ← alloue dongles, coders, mutexes
-│     └── init_threads()      ← lance tous les threads
-├── wait_threads()            ← pthread_join sur tous les threads
+│     ├── init_system(data)   ← allocates dongles, coders, mutexes
+│     └── init_threads()      ← launches all threads
+├── wait_threads()            ← pthread_join on all threads
 ├── cleanup_system(data)
 └── free(data)
 ```
@@ -434,11 +434,11 @@ main()
 
 ## `src/validate.c`
 
-- `argc != 9` → affiche l'usage et retourne 0
-- `argv[1..5]` : entier **> 0** obligatoire
-- `argv[6]` (nb_compiles_req) : peut valoir **0** (= infini)
-- `argv[7]` (dongle_cooldown) : peut valoir **≥ 0**
-- `argv[8]` : doit être exactement `"fifo"` ou `"edf"`
+- `argc != 9` → prints usage and returns 0
+- `argv[1..5]`: integer **> 0** required
+- `argv[6]` (nb_compiles_req): may be **0** (= infinite)
+- `argv[7]` (dongle_cooldown): may be **≥ 0**
+- `argv[8]`: must be exactly `"fifo"` or `"edf"`
 
 ---
 
@@ -449,16 +449,16 @@ init_system(data)
 ├── allocate_system()
 │     ├── malloc → N t_dongle
 │     ├── malloc → N t_coder
-│     ├── calloc → wait_queue  (zéro-initialisé)
-│     └── calloc → wait_order  (zéro-initialisé)
+│     ├── calloc → wait_queue  (zero-initialised)
+│     └── calloc → wait_order  (zero-initialised)
 ├── init_sync_objects()
 │     ├── pthread_mutex_init(&print_lock)
 │     ├── pthread_mutex_init(&sched_lock)
 │     └── pthread_cond_init(&sched_cond)
-├── init_coders()   [boucle i = 0..N-1]
+├── init_coders()   [loop i = 0..N-1]
 │     ├── coders[i].id           = i + 1
 │     ├── coders[i].left_dongle  = &dongles[i]
-│     └── coders[i].right_dongle = &dongles[(i+1) % N]  ← circulaire
+│     └── coders[i].right_dongle = &dongles[(i+1) % N]  ← circular
 └── wait_count = 0 | next_order = 1 | sim_running = 1
 ```
 
@@ -470,32 +470,32 @@ init_system(data)
 init_threads(data, monitor)
 ├── start_time = current_time_ms()          ← T = 0
 ├── LOCK sched_lock
-│   ├── last_compile_start = start_time pour chaque coder
+│   ├── last_compile_start = start_time for each coder
 │   └── enqueue_all(data)
-│         ├── Enregistre d'abord les coders IMPAIRS : 1, 3, 5, ...
-│         │     → ordres FIFO 1, 2, 3, ... (priorité maximale)
-│         └── Puis les coders PAIRS : 2, 4, 6, ...
+│         ├── First registers ODD coders: 1, 3, 5, ...
+│         │     → FIFO orders 1, 2, 3, ... (highest priority)
+│         └── Then EVEN coders: 2, 4, 6, ...
 ├── UNLOCK sched_lock
 ├── pthread_create ×N → coder_routine()
 └── pthread_create    → monitor_thread()
 ```
 
-**Pourquoi pré-enregistrer impairs en premier ?**
-Sans cette étape, l'ordre dépend du scheduler OS. Des coders pairs pourraient passer avant leurs voisins impairs. Le pré-enregistrement garantit que le coder 1 a toujours la priorité 1, le coder 3 la priorité 2, etc.
+**Why pre-register odd coders first?**
+Without this step, the order depends on the OS scheduler. Even coders could run before their odd neighbours. Pre-registration guarantees that coder 1 always has priority 1, coder 3 priority 2, etc.
 
 ---
 
 ## `src/routine.c`
 
 ```
-coder_routine()  ← chaque thread exécute ceci
+coder_routine()  ← each thread executes this
 │
-└── BOUCLE (tant que simulation active) :
-      ├── 1. scheduler_request()      → attend ses 2 dongles
+└── LOOP (while simulation is active):
+      ├── 1. scheduler_request()      → waits for its 2 dongles
       ├── 2. print "X is compiling"
       ├── 3. sleep_ms(time_to_compile)
       ├── 4. count_compile()          → LOCK / nb_compiles++ / UNLOCK
-      ├── 5. scheduler_release()      → libère dongles + cooldown + broadcast
+      ├── 5. scheduler_release()      → releases dongles + cooldown + broadcast
       ├── 6. print "X is debugging"   → sleep_ms(time_to_debug)
       └── 7. print "X is refactoring" → sleep_ms(time_to_refactor)
 ```
@@ -507,29 +507,29 @@ coder_routine()  ← chaque thread exécute ceci
 ### `scheduler_request`
 ```
 LOCK sched_lock
-sched_enqueue()           ← s'inscrit (no-op si déjà inscrit)
+sched_enqueue()           ← registers itself (no-op if already registered)
 
-BOUCLE INFINIE :
+INFINITE LOOP:
   ├── !sim_running → dequeue, UNLOCK, return 0
-  ├── try_acquire() == 1 → break (dongles acquis)
+  ├── try_acquire() == 1 → break (dongles acquired)
   └── pthread_cond_wait(&sched_cond, &sched_lock)
 
 UNLOCK sched_lock
 ```
 
-### `try_acquire` — acquisition atomique
+### `try_acquire` — atomic acquisition
 ```
-SI coder_can_compile() ET priority_is_clear() :
-  ├── left_dongle->is_used  = 1   ← atomique sous sched_lock
+IF coder_can_compile() AND priority_is_clear():
+  ├── left_dongle->is_used  = 1   ← atomic under sched_lock
   ├── right_dongle->is_used = 1
   ├── last_compile_start    = now
   ├── sched_dequeue()
   ├── broadcast(sched_cond)
   ├── UNLOCK sched_lock
-  ├── print_dongle_taken()        ← "X has taken a dongle" × 2 (même timestamp)
+  ├── print_dongle_taken()        ← "X has taken a dongle" × 2 (same timestamp)
   ├── LOCK sched_lock
   └── return 1
-SINON return 0
+ELSE return 0
 ```
 
 ### `scheduler_release`
@@ -545,11 +545,11 @@ UNLOCK sched_lock
 
 ## `src/scheduler_queue.c`
 
-**Min-Heap** : la plus haute priorité est toujours à l'index 0.
+**Min-Heap**: the highest priority is always at index 0.
 
 ```
-Exemple FIFO, 4 coders pré-enregistrés :
-wait_queue = [1, 3, 2, 4]   (impairs d'abord)
+FIFO example, 4 coders pre-registered:
+wait_queue = [1, 3, 2, 4]   (odd coders first)
          1
         / \
        3   2
@@ -559,13 +559,13 @@ wait_queue = [1, 3, 2, 4]   (impairs d'abord)
 
 ### `priority_before(first_id, second_id)`
 
-**FIFO :** `wait_order[first_id-1] < wait_order[second_id-1]`
+**FIFO:** `wait_order[first_id-1] < wait_order[second_id-1]`
 
-**EDF :**
+**EDF:**
 ```
 deadline = last_compile_start + time_to_burnout
-→ deadline la plus proche = plus haute priorité
-→ égalité : ID le plus bas gagne
+→ nearest deadline = highest priority
+→ tie: lowest ID wins
 ```
 
 ---
@@ -573,7 +573,7 @@ deadline = last_compile_start + time_to_burnout
 ## `src/scheduler_checks.c`
 
 ### `coder_can_compile(coder)`
-Retourne 1 si les **4 conditions** sont vraies :
+Returns 1 if all **4 conditions** are true:
 - `left_dongle->is_used == 0`
 - `right_dongle->is_used == 0`
 - `now >= left_dongle->available_at`
@@ -583,20 +583,20 @@ Retourne 1 si les **4 conditions** sont vraies :
 ```
 first_left=first_id-1, first_right=first_id%N
 second_left=second_id-1, second_right=second_id%N
-→ conflit si l'une des 4 combinaisons est égale
+→ conflict if any of the 4 combinations are equal
 
-Exemple N=5 : coders 4 et 5
-  coder4 : (3, 4)   |   coder5 : (4, 0)
-  → right(4) == left(5) == 4  → CONFLIT ✗
+Example N=5: coders 4 and 5
+  coder4: (3, 4)   |   coder5: (4, 0)
+  → right(4) == left(5) == 4  → CONFLICT ✗
 ```
 
 ### `priority_is_clear(my_id)`
 ```
-Pour chaque other_id dans wait_queue :
-  SI shares_dongle(my_id, other_id)
-  ET priority_before(other_id, my_id)
-  ET coder_can_compile(other_id)
-  → return 0  (je dois attendre)
+For each other_id in wait_queue:
+  IF shares_dongle(my_id, other_id)
+  AND priority_before(other_id, my_id)
+  AND coder_can_compile(other_id)
+  → return 0  (I must wait)
 
 return (wait_order[my_id-1] != 0)
 ```
@@ -608,42 +608,42 @@ return (wait_order[my_id-1] != 0)
 ```
 monitor_thread()
 └── while (monitor_cycle())
-         usleep(100)   ← vérifie toutes les 100 µs
+         usleep(100)   ← checks every 100 µs
 
 monitor_cycle()
 ├── LOCK sched_lock
 ├── !sim_running → UNLOCK, return 0
 ├── check_all_burnouts()
-│     Pour chaque coder :
+│     For each coder:
 │       now - last_compile_start > time_to_burnout ?
 │         → sim_running=0 → broadcast → UNLOCK
-│         → print "X burned out" (rouge)
-├── all_done() ? → si nb_compiles_req > 0 et tous ≥ req → true
-├── si done : sim_running=0 → broadcast → UNLOCK
-└── si done : LOCK print_lock → "All coders have compiled." → UNLOCK
+│         → print "X burned out" (red)
+├── all_done() ? → if nb_compiles_req > 0 and all ≥ req → true
+├── if done: sim_running=0 → broadcast → UNLOCK
+└── if done: LOCK print_lock → "All coders have compiled." → UNLOCK
 ```
 
-Le broadcast périodique du moniteur (toutes les 100 µs) sert aussi de réveil
-régulier pour les coders attendant la fin du cooldown d'un dongle.
+The monitor's periodic broadcast (every 100 µs) also acts as a regular wake-up
+for coders waiting for a dongle's cooldown to expire.
 
 ---
 
 ## `src/actions.c`
 
-Toutes les fonctions d'affichage :
+All display functions:
 ```
 LOCK print_lock
 ts = current_time_ms() - start_time
-si (sim_running OU msg[0]=='b') → printf + fflush
+if (sim_running OR msg[0]=='b') → printf + fflush
 UNLOCK print_lock
 ```
 
-| Fonction | Message | Note |
+| Function | Message | Note |
 |---|---|---|
-| `print_state()` | `"123 4 is compiling"` | `'b'` → rouge, affiché même après arrêt |
-| `print_dongle_taken()` | `"123 4 has taken a dongle"` × 2 | Deux lignes dans **le même lock** → même timestamp |
+| `print_state()` | `"123 4 is compiling"` | `'b'` → red, printed even after stop |
+| `print_dongle_taken()` | `"123 4 has taken a dongle"` × 2 | Two lines within **the same lock** → same timestamp |
 | `print_compile()` | `"123 4 is compiling"` | |
-| `simulation_is_running()` | — | Lock / lit sim_running / unlock |
+| `simulation_is_running()` | — | Lock / read sim_running / unlock |
 
 ---
 
@@ -662,60 +662,60 @@ cleanup_system(data)
 
 ## `src/utils.c`
 
-| Fonction | Description |
+| Function | Description |
 |---|---|
-| `ft_atoi(s)` | Gère espaces et signe +/−, convertit en int |
-| `is_number(s)` | Vérifie que la chaîne ne contient que des chiffres |
-| `current_time_ms()` | `gettimeofday` → ms depuis l'Epoch UNIX |
-| `sleep_ms(ms)` | Boucle `usleep(500)` jusqu'à l'heure cible (~0.5ms de précision) |
+| `ft_atoi(s)` | Handles spaces and +/− sign, converts to int |
+| `is_number(s)` | Checks that the string contains only digits |
+| `current_time_ms()` | `gettimeofday` → ms since UNIX Epoch |
+| `sleep_ms(ms)` | `usleep(500)` loop until target time (~0.5 ms precision) |
 
 ---
 
-## Flux d'exécution complet
+## Full Execution Flow
 
 ```
-THREAD PRINCIPAL (main)          THREADS CODERS                THREAD MONITEUR
-────────────────────────         ─────────────────────         ───────────────
+MAIN THREAD (main)               CODER THREADS                 MONITOR THREAD
+──────────────────               ─────────────────────         ───────────────
 validate_args()
 init_system()
 init_threads()
   start_time = now
-  pré-enregistre queue
+  pre-register queue
   pthread_create ×N ──────────► coder_routine()
   pthread_create ──────────────────────────────────────────► monitor_thread()
                                   scheduler_request()              loop:
-wait_threads()                      try_acquire ?              check_burnout()
-  pthread_join ×(N+1)               → oui: prend dongles      all_done() ?
-                                    → non: cond_wait           broadcast()
+wait_threads()                      try_acquire?               check_burnout()
+  pthread_join ×(N+1)               → yes: takes dongles       all_done()?
+                                    → no: cond_wait            broadcast()
 cleanup_system()                  print + compile              usleep(100)
 free(data)                        sleep(compile/debug/refactor)
 ```
 
 ---
 
-## Conditions d'arrêt
+## Stop Conditions
 
-| Condition | Déclencheur | Message |
+| Condition | Trigger | Message |
 |---|---|---|
-| **Burnout** | `now - last_compile_start > time_to_burnout` | `X burned out` (rouge) |
-| **Tous compilés** | `nb_compiles_req > 0` et tous ≥ req | `All coders have compiled.` (vert) |
-| **Infini** | `nb_compiles_req == 0` | Tourne jusqu'à un burnout |
+| **Burnout** | `now - last_compile_start > time_to_burnout` | `X burned out` (red) |
+| **All compiled** | `nb_compiles_req > 0` and all ≥ req | `All coders have compiled.` (green) |
+| **Infinite** | `nb_compiles_req == 0` | Runs until a burnout |
 
 ---
 
-## Prévention du deadlock — Conditions de Coffman
+## Deadlock Prevention — Coffman's Conditions
 
-| Condition | Statut | Explication |
+| Condition | Status | Explanation |
 |---|---|---|
-| Exclusion mutuelle | Inhérente | Les dongles sont exclusifs |
-| **Hold and Wait** | **Éliminé ✓** | Acquisition atomique des 2 dongles sous `sched_lock` |
-| Pas de préemption | Non nécessaire | Jamais de hold partiel |
-| **Attente circulaire** | **Éliminée ✓** | File de priorité centralisée |
+| Mutual exclusion | Inherent | Dongles are exclusive |
+| **Hold and Wait** | **Eliminated ✓** | Atomic acquisition of both dongles under `sched_lock` |
+| No preemption | Not needed | Never a partial hold |
+| **Circular wait** | **Eliminated ✓** | Centralised priority queue |
 
 ---
 
-## Politique de priorité — FIFO vs EDF
+## Priority Policy — FIFO vs EDF
 
-**FIFO** : priorité = ordre d'arrivée dans la file. Pré-enregistrement impairs→pairs garantit que les coders impairs compilent en premier au round 1.
+**FIFO**: priority = arrival order in the queue. Pre-registration of odd→even coders guarantees that odd-numbered coders compile first in round 1.
 
-**EDF** : priorité = urgence du burnout (`last_compile_start + time_to_burnout`). En cas d'égalité, l'ID le plus bas gagne. Maximise le nombre de coders qui respectent leur deadline.
+**EDF**: priority = burnout urgency (`last_compile_start + time_to_burnout`). On a tie, the lowest ID wins. Maximises the number of coders that meet their deadline.
