@@ -6,7 +6,7 @@
 /*   By: bbeaurai <bbeaurai@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 15:59:09 by bbeaurai          #+#    #+#             */
-/*   Updated: 2026/05/30 11:25:38 by bbeaurai         ###   ########.fr       */
+/*   Updated: 2026/05/31 13:02:46 by bbeaurai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	print_state(t_data *data, int id, const char *msg)
 	if (simulation_is_running(data) || msg[0] == 'b')
 	{
 		if (msg[0] == 'b')
-			printf("\033[0;31m%lld %d %s\033[0m\n", ts, id, msg);
+			printf("\n\033[0;31m%lld %d %s\033[0m\n", ts, id, msg);
 		else
 			printf("%lld %d %s\n", ts, id, msg);
 		fflush(stdout);
@@ -38,6 +38,7 @@ void	print_dongle_taken(t_data *data, int id)
 	ts = current_time_ms() - data->start_time;
 	if (simulation_is_running(data))
 	{
+		printf("%lld %d has taken a dongle\n", ts, id);
 		printf("%lld %d has taken a dongle\n", ts, id);
 		fflush(stdout);
 	}

@@ -17,8 +17,7 @@ case "$2" in
         VALGRIND="valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes"
         ;;
     "helgrind")
-        VALGRIND="valgrind --tool=helgrind --tool=drd"
-        ;;
+        VALGRIND="valgrind --tool=helgrind --tool=drd"        ;;
     "")
         VALGRIND=""
         ;;

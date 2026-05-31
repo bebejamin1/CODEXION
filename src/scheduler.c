@@ -23,27 +23,15 @@ static int	try_acquire(t_data *data, t_coder *coder, int my_id)
 		pthread_cond_broadcast(&data->sched_cond);
 		pthread_mutex_unlock(&data->sched_lock);
 		print_dongle_taken(data, coder->id);
-		print_dongle_taken(data, coder->id);
 		pthread_mutex_lock(&data->sched_lock);
 		return (1);
 	}
 	return (0);
 }
 
-static void	wait_scheduler(t_data *data, t_coder *coder)
+static void	wait_scheduler(t_data *data)
 {
-	struct timespec	timeout;
-	long long		wake_time;
-
-	wake_time = next_wake_time(coder);
-	if (wake_time <= current_time_ms())
-		pthread_cond_wait(&data->sched_cond, &data->sched_lock);
-	else
-	{
-		get_timeout(&timeout, wake_time);
-		pthread_cond_timedwait(&data->sched_cond,
-			&data->sched_lock, &timeout);
-	}
+	pthread_cond_wait(&data->sched_cond, &data->sched_lock);
 }
 
 int	scheduler_request(t_data *data, t_coder *coder)
@@ -63,7 +51,7 @@ int	scheduler_request(t_data *data, t_coder *coder)
 		}
 		if (try_acquire(data, coder, my_id))
 			break ;
-		wait_scheduler(data, coder);
+		wait_scheduler(data);
 	}
 	pthread_mutex_unlock(&data->sched_lock);
 	return (1);
