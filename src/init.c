@@ -39,15 +39,14 @@ static int	allocate_system(t_data *data)
 		free(data->dongles);
 		return (0);
 	}
-	data->wait_queue = malloc(sizeof(int) * data->nb_coders);
+	data->wait_queue = calloc(data->nb_coders, sizeof(int));
 	if (!data->wait_queue)
 	{
 		free(data->coders);
 		free(data->dongles);
 		return (0);
 	}
-	memset(data->wait_queue, 0, sizeof(int) * data->nb_coders);
-	data->wait_order = malloc(sizeof(int) * data->nb_coders);
+	data->wait_order = calloc(data->nb_coders, sizeof(int));
 	if (!data->wait_order)
 	{
 		free(data->wait_queue);
@@ -55,7 +54,6 @@ static int	allocate_system(t_data *data)
 		free(data->dongles);
 		return (0);
 	}
-	memset(data->wait_order, 0, sizeof(int) * data->nb_coders);
 	return (1);
 }
 

@@ -30,15 +30,6 @@ static int	try_acquire(t_data *data, t_coder *coder, int my_id)
 	return (0);
 }
 
-static int	wait_one_coder(t_data *data, int my_id)
-{
-	sched_dequeue(data, my_id);
-	while (data->sim_running)
-		pthread_cond_wait(&data->sched_cond, &data->sched_lock);
-	pthread_mutex_unlock(&data->sched_lock);
-	return (0);
-}
-
 static void	wait_scheduler(t_data *data, t_coder *coder)
 {
 	struct timespec	timeout;
@@ -62,8 +53,6 @@ int	scheduler_request(t_data *data, t_coder *coder)
 	my_id = coder->id;
 	pthread_mutex_lock(&data->sched_lock);
 	sched_enqueue(data, my_id);
-	if (data->nb_coders == 1)
-		return (wait_one_coder(data, my_id));
 	while (1)
 	{
 		if (!data->sim_running)

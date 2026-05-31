@@ -19,7 +19,7 @@ static int	all_done(t_data *data)
 	int	i;
 
 	if (data->nb_compiles_req == 0)
-		return (1);
+		return (0);
 	i = 0;
 	while (i < data->nb_coders)
 	{
@@ -49,10 +49,24 @@ static int	check_burnout(t_data *data, t_coder *target)
 	return (0);
 }
 
-static int	monitor_cycle(t_data *data)
+static int	check_all_burnouts(t_data *data)
 {
 	int	i;
+
+	i = 0;
+	while (i < data->nb_coders)
+	{
+		if (check_burnout(data, &data->coders[i]))
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
+static int	monitor_cycle(t_data *data)
+{
 	int	running;
+	int	done;
 
 	pthread_mutex_lock(&data->sched_lock);
 	if (!data->sim_running)
@@ -60,21 +74,20 @@ static int	monitor_cycle(t_data *data)
 		pthread_mutex_unlock(&data->sched_lock);
 		return (0);
 	}
-	i = 0;
-	while (i < data->nb_coders)
-	{
-		if (check_burnout(data, &data->coders[i]))
-			return (0);
-		i++;
-	}
-	if (all_done(data))
-	{
-		printf("\n\033[0;32mAll coders have compiled.\033[0m\n");
+	if (check_all_burnouts(data))
+		return (0);
+	done = all_done(data);
+	if (done)
 		data->sim_running = 0;
-	}
 	running = data->sim_running;
 	pthread_cond_broadcast(&data->sched_cond);
 	pthread_mutex_unlock(&data->sched_lock);
+	if (done)
+	{
+		pthread_mutex_lock(&data->print_lock);
+		printf("\n\033[0;32mAll coders have compiled.\033[0m\n");
+		pthread_mutex_unlock(&data->print_lock);
+	}
 	return (running);
 }
 

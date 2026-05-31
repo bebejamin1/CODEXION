@@ -44,7 +44,9 @@ int	validate_args(int argc, char **argv)
 	i = 1;
 	while (i <= 7)
 	{
-		if (!is_number(argv[i]) || (i != 6 && ft_atoi(argv[i]) <= 0))
+		if (!is_number(argv[i])
+			|| ((i != 6 && i != 7) && ft_atoi(argv[i]) <= 0)
+			|| (i == 7 && ft_atoi(argv[i]) < 0))
 		{
 			print_int();
 			return (0);
