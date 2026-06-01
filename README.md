@@ -22,12 +22,12 @@ Key challenges addressed: deadlock-free dongle acquisition, two scheduling polic
 (FIFO and EDF), per-dongle cooldown, precise burnout detection within 10 ms, and
 serialized logging across all threads.
 
-## Instructions
 
 ## Visual
 <img width="800" height="383" alt="Visual_CODEXION" src="https://github.com/user-attachments/assets/257c5758-1f13-4f19-b07d-6dccb66cf687" />
 
 
+## Instructions
 
 ### Compilation
 
