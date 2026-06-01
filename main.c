@@ -6,7 +6,7 @@
 /*   By: bbeaurai <bbeaurai@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 15:57:21 by bbeaurai          #+#    #+#             */
-/*   Updated: 2026/05/24 10:25:03 by bbeaurai         ###   ########.fr       */
+/*   Updated: 2026/06/01 15:38:26 by bbeaurai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,12 @@ int	main(int argc, char **argv)
 		return (EXIT_FAILURE);
 	}
 	set_data_from_args(data, argv);
+	if (data->nb_coders == 1)
+	{
+		printf("\033[0;31m0 0 burned out\033[0m");
+		free(data);
+		return (EXIT_FAILURE);
+	}
 	if (!start_simulation(data, &monitor))
 		return (EXIT_FAILURE);
 	wait_threads(data, monitor);

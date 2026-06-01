@@ -6,13 +6,15 @@
 /*   By: bbeaurai <bbeaurai@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/21 15:59:22 by bbeaurai          #+#    #+#             */
-/*   Updated: 2026/05/24 10:25:04 by bbeaurai         ###   ########.fr       */
+/*   Updated: 2026/06/01 15:37:57 by bbeaurai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include <string.h>
 #include "../inc/codexion.h"
+
+#include <stdio.h>
 
 static int	init_dongle_and_coder(t_data *data, int i)
 {

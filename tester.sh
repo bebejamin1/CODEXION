@@ -39,6 +39,9 @@ run_test() {
 
 
 case "$1" in
+	0)
+		run_test one coder "1 1000 100 100 100 1 200 fifo"
+		;;
 	1)
 		run_test basic_fifo "4 800 200 200 200 5 10 fifo"
 		;;
