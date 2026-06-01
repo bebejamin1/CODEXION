@@ -308,13 +308,10 @@ code before ignoring them.
 
 ## Resources
 
-- `pthread_create(3)`, `pthread_join(3)`, `pthread_mutex_*(3)`, `pthread_cond_*(3)` man pages — core threading primitives used throughout.
-- `gettimeofday(2)` man page — millisecond timestamp implementation.
-- *The Little Book of Semaphores* — Allen B. Downey — dining philosophers analysis and synchronization patterns.
-- *Operating Systems: Three Easy Pieces* — Arpaci-Dusseau — chapters on concurrency, locks, and condition variables.
-- Valgrind User Manual — `https://valgrind.org/docs/manual/` — Memcheck, Helgrind, DRD tools.
-- 42 Norm documentation.
-- The Codexion subject (version 1.4) and peer-evaluation scale.
+- Visual : https://codexionvisualizer.dev/
+- Structure : https://zestedesavoir.com/tutoriels/755/le-langage-c-1/1043_aggregats-memoire-et-fichiers/4279_structures/
+- Thread/Mutex : https://www.codequoi.com/threads-mutex-et-programmation-concurrente-en-c/
+- Algo : https://rmdiscala.developpez.com/cours/LesChapitres.html/Cours4/TArbrechap4.6.htm
 
 **AI usage:** AI was used to:
 
