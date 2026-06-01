@@ -6,7 +6,7 @@
 /*   By: bbeaurai <bbeaurai@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 10:25:00 by bbeaurai          #+#    #+#             */
-/*   Updated: 2026/05/24 10:38:45 by bbeaurai         ###   ########.fr       */
+/*   Updated: 2026/06/01 16:02:26 by bbeaurai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,11 +42,11 @@ int	validate_args(int argc, char **argv)
 		return (0);
 	}
 	i = 1;
+	if (ft_atoi(argv[1]) > 20)
+		return (printf("The coder number cannot exceed 20"), 0);
 	while (i <= 7)
 	{
-		if (!is_number(argv[i])
-			|| ((i != 6 && i != 7) && ft_atoi(argv[i]) <= 0)
-			|| (i == 7 && ft_atoi(argv[i]) < 0))
+		if (!is_number(argv[i]) || ft_atoi(argv[i]) <= 0)
 		{
 			print_int();
 			return (0);
