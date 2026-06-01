@@ -2,7 +2,7 @@
 
 # Codexion
 
-## Description
+## Preview
 <img width="800" height="435" alt="CODEXION_PREVIEW" src="https://github.com/user-attachments/assets/0bb366ed-5db5-4ca3-b697-0dc49db6c862" />
 
 
@@ -23,6 +23,11 @@ Key challenges addressed: deadlock-free dongle acquisition, two scheduling polic
 serialized logging across all threads.
 
 ## Instructions
+
+## Visual
+<img width="800" height="383" alt="Visual_CODEXION" src="https://github.com/user-attachments/assets/257c5758-1f13-4f19-b07d-6dccb66cf687" />
+
+
 
 ### Compilation
 
