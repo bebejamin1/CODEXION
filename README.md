@@ -3,6 +3,11 @@
 # Codexion
 
 ## Description
+<img width="800" height="435" alt="CODEXION_PREVIEW" src="https://github.com/user-attachments/assets/0bb366ed-5db5-4ca3-b697-0dc49db6c862" />
+
+
+
+## Description
 
 Codexion is a POSIX threads simulation inspired by the dining philosophers problem.
 Several coders sit around a shared circular workspace, each needing **two USB dongles**
