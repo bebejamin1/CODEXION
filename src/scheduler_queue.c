@@ -6,12 +6,13 @@
 /*   By: bbeaurai <bbeaurai@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 10:25:00 by bbeaurai          #+#    #+#             */
-/*   Updated: 2026/05/30 00:00:00 by bbeaurai         ###   ########.fr       */
+/*   Updated: 2026/06/02 17:33:28 by bbeaurai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/codexion.h"
 
+// FIFO (scheduler_type == 0) :
 int	priority_before(t_data *data, int first_id, int second_id)
 {
 	long long	first_deadline;
