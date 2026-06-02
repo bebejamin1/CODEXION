@@ -341,7 +341,7 @@ Coder 4       Coder 2
       Coder 3
 ```
 
-> Coder 1 needs `dongle5` **AND** `dongle1` simultaneously.
+> Coder 1 needs `dongle4` **AND** `dongle1` simultaneously.
 > Coder 1 and Coder 3 can compile **AT THE SAME TIME** (no shared dongle).
 
 ---
