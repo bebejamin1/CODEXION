@@ -332,13 +332,13 @@ All logic, architectural decisions, and code were written and understood by the 
 ```
       Coder 1
      /       \
- dongle5   dongle1
+ dongle4   dongle1
    /             \
-Coder 5       Coder 2
+Coder 4       Coder 2
    \             /
- dongle4   dongle2
+ dongle3   dongle2
      \       /
-      Coder 4 — dongle3 — Coder 3
+      Coder 3
 ```
 
 > Coder 1 needs `dongle5` **AND** `dongle1` simultaneously.
