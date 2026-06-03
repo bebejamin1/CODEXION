@@ -311,6 +311,8 @@ code before ignoring them.
 - Visual : https://codexionvisualizer.dev/
 - Structure : https://zestedesavoir.com/tutoriels/755/le-langage-c-1/1043_aggregats-memoire-et-fichiers/4279_structures/
 - Thread/Mutex : https://www.codequoi.com/threads-mutex-et-programmation-concurrente-en-c/
+- The `tester.sh` script was created by [Overtek](https://github.com/Overtekk).
+
 
 **AI usage:** AI was used to:
 
