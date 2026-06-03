@@ -6,7 +6,7 @@
 /*   By: bbeaurai <bbeaurai@student.42lehavre.fr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/24 10:25:00 by bbeaurai          #+#    #+#             */
-/*   Updated: 2026/06/01 16:02:26 by bbeaurai         ###   ########.fr       */
+/*   Updated: 2026/06/03 08:53:09 by bbeaurai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,10 @@ static void	print_scheduler(void)
 
 static void	print_usage(void)
 {
-	printf("Usage: ./codexion number_of_coders time_to_burnout \n");
-	printf("time_to_compile time_to_debug time_to_refactor \n");
+	printf("Usage: ./codexion number_of_coders time_to_burnout ");
+	printf("time_to_compile time_to_debug time_to_refactor ");
 	printf("number_of_compiles_required dongle_cooldown scheduler(fifo|edf)\n");
+	printf("\ntry with this");
 	printf("\n./codexion 2 1000 200 200 200 1 200 edf\n");
 }
 
